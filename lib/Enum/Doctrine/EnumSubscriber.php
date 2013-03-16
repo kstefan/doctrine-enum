@@ -9,7 +9,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Enum\Doctrine\Mapping\Annotation\Enum;
 use Enum\EnumInterface;
