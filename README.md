@@ -39,7 +39,7 @@ class User
     protected $id;
 
     /**
-     * @Enum(class="Expensa\Enum\UserState")
+     * @Enum(class="App\Enum\UserState")
      * @ORM\Column(type="string_enum", length=50)
      **/
     protected $state;
