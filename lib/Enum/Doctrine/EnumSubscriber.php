@@ -31,11 +31,6 @@ class EnumSubscriber implements EventSubscriber
 
     public function __construct()
     {
-        AnnotationRegistry::registerAutoloadNamespace(
-            'Enum\\Doctrine\\Mapping\\Annotation',
-            __DIR__ . '/../../../'
-        );
-
         $this->annotationReader = new CachedReader(new AnnotationReader(), new ArrayCache());
 
         Type::addType('string_enum', 'Enum\Doctrine\Type\StringEnumType');
