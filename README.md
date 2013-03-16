@@ -3,6 +3,14 @@ doctrine-enum
 
 Enum type for Doctrine2
 
+Example
+-
+Register subscriber:
+```php
+$eventManager->addEventSubscriber(new Enum\Doctrine\EnumSubscriber());
+```
+
+Define enum:
 ```php
 <?php
 
@@ -16,7 +24,7 @@ class UserState extends AbstractEnum
     const STATE_ACTIVE = 'active';
 }
 ```
-
+Define entity:
 ```php
 <?php
 
@@ -68,8 +76,18 @@ class User
 }
 ```
 
-Register subscriber
--
+Work with enums:
 ```php
-$eventManager->addEventSubscriber(new Enum\Doctrine\EnumSubscriber());
+<?php
+
+use App\Entity\User;
+use App\Enum\UserState;
+
+$user = $entityManager->getRepository('App\Entity\User')->find(1);
+echo $user->getState()->getValue();
+// new
+$user->setState(new UserState(UserState::STATE_ACTIVE));
+echo $user->getState()->getValue();
+// active
+$entityManager->flush($user);
 ```
