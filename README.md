@@ -67,3 +67,9 @@ class User
     }
 }
 ```
+
+Register subscriber
+-
+```php
+$eventManager->addEventSubscriber(new Enum\Doctrine\EnumSubscriber());
+```
