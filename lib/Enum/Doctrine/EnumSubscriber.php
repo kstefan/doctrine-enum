@@ -32,13 +32,13 @@ class EnumSubscriber implements EventSubscriber
     public function __construct()
     {
         AnnotationRegistry::registerAutoloadNamespace(
-            'Expensa\\Enum\\Doctrine\\Mapping\\Annotation',
+            'Enum\\Doctrine\\Mapping\\Annotation',
             __DIR__ . '/../../../'
         );
 
         $this->annotationReader = new CachedReader(new AnnotationReader(), new ArrayCache());
 
-        Type::addType('string_enum', 'Expensa\Enum\Doctrine\Type\StringEnumType');
+        Type::addType('string_enum', 'Enum\Doctrine\Type\StringEnumType');
     }
 
     public function getSubscribedEvents()
