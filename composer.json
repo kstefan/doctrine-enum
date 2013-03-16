@@ -1,0 +1,28 @@
+{
+    "name": "kstefan/doctrine-enum",
+    "description": "Enum type for Doctrine2",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "enum",
+        "doctrine",
+        "doctrine2",
+        "orm"
+    ],
+    "authors": [
+        {
+            "name": "Karel Štefan",
+            "email": "dev@karelstefan.cz"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "kstefan/enum": "dev-master",
+        "doctrine/orm": "2.3.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Enum\\Doctrine\\": "lib/"
+        }
+    }
+}
