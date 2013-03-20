@@ -9,6 +9,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Enum\Doctrine\Mapping\Annotation\Enum;
@@ -18,11 +19,11 @@ class EnumSubscriber implements EventSubscriber
 {
     const CACHE_PREFIX = 'KSTEFANENUM';
 
-    protected static $enumTypes = array(
+    protected static $enumTypes = [
         'string_enum',
-    );
+    ];
 
-    protected $enumMetadataCache = array();
+    protected $enumMetadataCache = [];
 
     /**
      * @var \Doctrine\Common\Annotations\CachedReader
@@ -49,32 +50,36 @@ class EnumSubscriber implements EventSubscriber
         return self::CACHE_PREFIX . $entityName;
     }
 
+    /**
+     * @param EntityManager $entityManager
+     * @return \Doctrine\Common\Cache\Cache
+     */
+    protected function getCache(EntityManager $entityManager)
+    {
+        return $entityManager->getConfiguration()->getMetadataCacheImpl();
+    }
+
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs)
     {
         $metadata = $eventArgs->getClassMetadata();
         $cacheKey = $this->getCacheKey($metadata->getName());
+        $cache = $this->getCache($eventArgs->getEntityManager());
 
-        if (!isset($this->enumMetadataCache[$cacheKey])) {
-            $cache = $eventArgs->getEntityManager()->getConfiguration()->getMetadataCacheImpl();
+        $enums = [];
+        foreach ($metadata->getFieldNames() as $field) {
+            if (in_array($metadata->getTypeOfField($field), self::$enumTypes)) {
+                $reflProp = $metadata->getReflectionClass()->getProperty($field);
 
-            if (!$cache->contains($cacheKey)) {
-                $enums = array();
-                foreach ($metadata->getFieldNames() as $field) {
-                    if (in_array($metadata->getTypeOfField($field), self::$enumTypes)) {
-                        $reflProp = $metadata->getReflectionClass()->getProperty($field);
-
-                        foreach ($this->annotationReader->getPropertyAnnotations($reflProp) as $annotation) {
-                            if ($annotation instanceof Enum) {
-                                $enums[$field] = $annotation;
-                            }
-                        }
+                foreach ($this->annotationReader->getPropertyAnnotations($reflProp) as $annotation) {
+                    if ($annotation instanceof Enum) {
+                        $enums[$field] = $annotation;
                     }
                 }
-
-                $cache->save($cacheKey, $enums);
             }
+        }
 
-            $this->enumMetadataCache[$cacheKey] = $cache->fetch($cacheKey);
+        if (count($enums)) {
+            $cache->save($cacheKey, $enums);
         }
     }
 
@@ -83,28 +88,32 @@ class EnumSubscriber implements EventSubscriber
         $entity = $eventArgs->getEntity();
         $cacheKey = $this->getCacheKey(get_class($entity));
 
-        if (isset($this->enumMetadataCache[$cacheKey])) {
-            foreach ($this->enumMetadataCache[$cacheKey] as $field => $annotation) {
-                $getter = 'get' . ucfirst($field);
+        if (!array_key_exists($cacheKey, $this->enumMetadataCache)) {
+            $cache = $this->getCache($eventArgs->getEntityManager());
+            $this->enumMetadataCache[$cacheKey] = $cache->contains($cacheKey)
+                ? $cache->fetch($cacheKey)
+                : []
+            ;
+        }
 
-                if (!method_exists($entity, $getter)) {
-                    throw new RuntimeException('Getter "' . $getter . '" not defined.');
+        foreach ($this->enumMetadataCache[$cacheKey] as $field => $annotation) {
+            $getter = 'get' . ucfirst($field);
+
+            if (!method_exists($entity, $getter)) {
+                throw new RuntimeException('Getter "' . $getter . '" not defined.');
+            }
+
+            $value = $entity->$getter();
+            if (!$value instanceof EnumInterface && !is_null($value)) {
+                $setter = 'set' . ucfirst($field);
+
+                if (!method_exists($entity, $setter)) {
+                    throw new RuntimeException('Setter "' . $setter . '" not defined.');
                 }
 
-                $value = $entity->$getter();
-                if (!$value instanceof EnumInterface && !is_null($value)) {
-                    $setter = 'set' . ucfirst($field);
-
-                    if (!method_exists($entity, $setter)) {
-                        throw new RuntimeException('Setter "' . $setter . '" not defined.');
-                    }
-
-                    $class = $annotation->class;
-                    $entity->$setter(new $class($value));
-                }
+                $class = $annotation->class;
+                $entity->$setter(new $class($value));
             }
         }
     }
-
-
 }
