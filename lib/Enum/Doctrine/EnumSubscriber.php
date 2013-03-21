@@ -34,7 +34,9 @@ class EnumSubscriber implements EventSubscriber
     {
         $this->annotationReader = new CachedReader(new AnnotationReader(), new ArrayCache());
 
-        Type::addType('string_enum', 'Enum\Doctrine\Type\StringEnumType');
+        if (!Type::hasType('string_enum')) {
+            Type::addType('string_enum', 'Enum\Doctrine\Type\StringEnumType');
+        }
     }
 
     public function getSubscribedEvents()
