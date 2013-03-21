@@ -3,16 +3,11 @@
 namespace Enum\Doctrine\Type;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\StringType as DBALStringType;
 use Enum\EnumInterface;
 
-class StringEnumType extends StringType
+class StringType extends DBALStringType
 {
-    public function getName()
-    {
-        return 'string_enum';
-    }
-
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
         if ($value instanceof EnumInterface) {

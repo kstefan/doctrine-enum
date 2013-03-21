@@ -13,14 +13,15 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Enum\Doctrine\Mapping\Annotation\Enum;
+use Enum\Doctrine\Type\StringType;
 use Enum\EnumInterface;
 
 class EnumSubscriber implements EventSubscriber
 {
     const CACHE_PREFIX = 'KSTEFANENUM';
 
-    protected static $enumTypes = [
-        'string_enum',
+    protected static $enumTypeMap = [
+        StringType::STRING => 'Enum\Doctrine\Type\StringType'
     ];
 
     protected $enumMetadataCache = [];
@@ -33,9 +34,13 @@ class EnumSubscriber implements EventSubscriber
     public function __construct()
     {
         $this->annotationReader = new CachedReader(new AnnotationReader(), new ArrayCache());
+        $this->registerTypes();
+    }
 
-        if (!Type::hasType('string_enum')) {
-            Type::addType('string_enum', 'Enum\Doctrine\Type\StringEnumType');
+    protected function registerTypes()
+    {
+        foreach (self::$enumTypeMap as $name => $class) {
+            Type::overrideType($name, $class);
         }
     }
 
@@ -66,10 +71,10 @@ class EnumSubscriber implements EventSubscriber
         $metadata = $eventArgs->getClassMetadata();
         $cacheKey = $this->getCacheKey($metadata->getName());
         $cache = $this->getCache($eventArgs->getEntityManager());
-
         $enums = [];
+
         foreach ($metadata->getFieldNames() as $field) {
-            if (in_array($metadata->getTypeOfField($field), self::$enumTypes)) {
+            if (isset(self::$enumTypeMap[$metadata->getTypeOfField($field)])) {
                 $reflProp = $metadata->getReflectionClass()->getProperty($field);
 
                 foreach ($this->annotationReader->getPropertyAnnotations($reflProp) as $annotation) {
