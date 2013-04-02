@@ -48,7 +48,7 @@ class User
 
     /**
      * @Enum(class="App\Enum\UserState")
-     * @ORM\Column(type="string_enum", length=50)
+     * @ORM\Column(type="string", length=50)
      **/
     protected $state;
 
