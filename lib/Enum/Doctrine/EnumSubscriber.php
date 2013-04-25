@@ -12,6 +12,7 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+use Doctrine\ORM\Proxy\Proxy;
 use Enum\Doctrine\Mapping\Annotation\Enum;
 use Enum\Doctrine\Type\StringType;
 use Enum\EnumInterface;
@@ -93,7 +94,14 @@ class EnumSubscriber implements EventSubscriber
     public function postLoad(LifecycleEventArgs $eventArgs)
     {
         $entity = $eventArgs->getEntity();
-        $cacheKey = $this->getCacheKey(get_class($entity));
+
+        if ($entity instanceof Proxy) {
+            $class = get_parent_class($entity);
+        } else {
+            $class = get_class($entity);
+        }
+
+        $cacheKey = $this->getCacheKey($class);
 
         if (!array_key_exists($cacheKey, $this->enumMetadataCache)) {
             $cache = $this->getCache($eventArgs->getEntityManager());
