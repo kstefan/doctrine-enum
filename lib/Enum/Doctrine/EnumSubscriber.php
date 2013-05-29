@@ -16,6 +16,7 @@ use Doctrine\ORM\Proxy\Proxy;
 use Enum\Doctrine\Mapping\Annotation\Enum;
 use Enum\Doctrine\Type\StringType;
 use Enum\EnumInterface;
+use RuntimeException;
 
 class EnumSubscriber implements EventSubscriber
 {
