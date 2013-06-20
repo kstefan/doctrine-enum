@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "kstefan/enum": "dev-master",
+        "kstefan/enum": "1.0",
         "doctrine/orm": "2.3.*"
     },
     "autoload": {
