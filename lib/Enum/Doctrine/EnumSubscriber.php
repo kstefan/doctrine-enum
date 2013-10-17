@@ -112,6 +112,7 @@ class EnumSubscriber implements EventSubscriber
             ;
         }
 
+        $originalData = [];
         foreach ($this->enumMetadataCache[$cacheKey] as $field => $annotation) {
             $getter = 'get' . ucfirst($field);
 
@@ -128,7 +129,19 @@ class EnumSubscriber implements EventSubscriber
                 }
 
                 $class = $annotation->class;
-                $entity->$setter(new $class($value));
+                $enum = new $class($value);
+                $entity->$setter($enum);
+                $originalData[$field] = $enum;
+            }
+        }
+
+        if (count($originalData)) {
+            $uow = $eventArgs->getEntityManager()->getUnitOfWork();
+            $data = $uow->getOriginalEntityData($entity);
+
+            if (count($data)) {
+                $data = array_merge($data, $originalData);
+                $uow->setOriginalEntityData($entity, $data);
             }
         }
     }
