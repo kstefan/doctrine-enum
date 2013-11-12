@@ -18,7 +18,7 @@
     "require": {
         "php": ">=5.4.0",
         "kstefan/enum": "1.0",
-        "doctrine/orm": "2.3.*"
+        "doctrine/orm": "2.4.*"
     },
     "autoload": {
         "psr-0": {
