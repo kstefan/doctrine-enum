@@ -3,6 +3,9 @@ doctrine-enum
 
 Enum type for Doctrine2
 
+This type is deprecated!
+
+
 Example
 -
 Register subscriber:
